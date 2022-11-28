@@ -1,23 +1,20 @@
-// Enters details on the form
-// Event listner
-// Run Book Constructor to create Book
-// 
+// UI Elements 
+const bookForm = document.getElementById('bookForm'),
+      table = document.getElementsByClassName('table'), 
+      btnSubmit = document.getElementById('btnSubmit'), 
+      bookName = document.getElementById('bookName'), 
+      author = document.getElementById('author'),
+      isbn = document.getElementById('isbn'), 
+      tableBody = document.getElementById('tableBody'); 
 
 // Book Constuctor 
-
 class Book {
     constructor(bookName, author, isbn){
-        
         this.bookName = bookName; 
         this.author = author; 
         this.isbn = isbn ; 
-
     }
-
-    // storeBookLocalStorage(){
-    //     console.log(this.Book);
-    // }
-
+    // Displays Book
     displayBook(){
         let bookRow = document.createElement('tr'); 
         bookRow.innerHTML = `
@@ -31,72 +28,78 @@ class Book {
         </th>
         `;
         tableBody.appendChild(bookRow);
-
     }
-
     deleteBook(){
-
         console.log("Delete Book from UI and ");
     }
-
-    
 }
-
-// UI Elements 
-
-const bookForm = document.getElementById('bookForm'); 
-const table = document.getElementsByClassName('table'); 
-const btnSubmit = document.getElementById('btnSubmit'); 
-const bookName = document.getElementById('bookName');
-const author = document.getElementById('author'); 
-const isbn = document.getElementById('isbn'); 
-const tableBody = document.getElementById('tableBody'); 
 
 // Load Event Listners
 loadEventListners(); 
-
 // Add Book
 function loadEventListners() {
-    
     // Add Book Event
     btnSubmit.addEventListener('click', (e)=>{
+        // Validation of fields
+        if (bookName.value === '' || author.value === '' || isbn.value === '') {
+                const errorMessage = document.createElement('div'); 
+                errorMessage.innerHTML = 'Please check the form for missing values';
+                errorMessage.classList.add('alert');
+                errorMessage.classList.add('alert-danger');
+                errorMessage.classList.add('mt-2');
+                bookForm.appendChild(errorMessage);
+            setTimeout(()=>{
+                bookForm.removeChild(bookForm.lastChild); 
+            }, 4000)
+        } else {
         // Construct Book
         let book = new Book(bookName.value, author.value, isbn.value)
         // Add Book to Local Storage
         storeBookInLocalStorage(book);
         // Display book in the UI 
         book.displayBook(); 
-    
+        }
         e.preventDefault(); 
     })
 
-    // Delete Book Event
-    tableBody.addEventListener('click', (e)=>{
-
-        console.log(e.target);
-
-        if (e.target.parentElement.classList.contains('delete-item')) {
-            e.target.parentElement.parentElement.parentElement.remove(); 
-        }
-
+        // Delete Book Event
+        tableBody.addEventListener('click', (e)=>{
+            if (e.target.parentElement.classList.contains('delete-item')) {
+                e.target.parentElement.parentElement.parentElement.remove();
+                let book = e.target.parentElement.parentElement.parentElement.firstElementChild.textContent;
+                deleteBookfromLocalStorage(book); 
+            }
     })
-    
-
 }
 
 
 
-// Store book in local storage 
 
+// Store book in local storage 
 function storeBookInLocalStorage(book) {
     let books;
-
     if (localStorage.getItem('books') === null) {
         books = []; 
     }else{
         books = JSON.parse(localStorage.getItem('books'))
     }
-
     books.push(book);
     localStorage.setItem('books', JSON.stringify(books));
 }
+
+// Delete from local storage 
+function deleteBookfromLocalStorage(bookItem) {
+    let books; 
+    if (localStorage.getItem('books') === null) {
+        books = []; 
+    }else{
+        books = JSON.parse(localStorage.getItem('books'))
+        console.log(books);
+    }
+    books.forEach(function(book, index) {
+        if (bookItem === book.bookName) {
+          books.splice(index, 1); 
+        }
+    });
+    localStorage.setItem('books', JSON.stringify(books))
+};
